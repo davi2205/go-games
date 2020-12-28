@@ -1,3 +1,7 @@
+// Copyright (c) 2020 Davi Villalva.
+// a licensa pode ser encontrada no arquivo LICENSE na raíz do repositório.
+// license can be found at the root of the repository in the LICENSE file.
+
 package main
 
 import (
@@ -6,24 +10,16 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-type Game struct{}
-
-func (g *Game) Update() error {
-	return nil
-}
-
-func (g *Game) Draw(screen *ebiten.Image) {
-
-}
-
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 320, 240
-}
+const (
+	telaLargura  = 640
+	telaAltura   = 480
+	tituloJanela = "BlockBreaker by Davi Villalva"
+)
 
 func main() {
-	ebiten.SetWindowSize(640, 480)
-	ebiten.SetWindowTitle("Hello, World!")
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	ebiten.SetWindowSize(telaLargura, telaAltura)
+	ebiten.SetWindowTitle(tituloJanela)
+	if err := ebiten.RunGame(&Jogo{}); err != nil {
 		log.Fatal(err)
 	}
 }
