@@ -5,7 +5,6 @@
 package main
 
 import (
-	"image"
 	"image/color"
 	"log"
 
@@ -39,21 +38,27 @@ func (c *Cena) Desenha(tela *ebiten.Image) {
 }
 
 type Jogador struct {
-	Limites image.Rectangle
+	X, Y    float32
+	Tamanho float32
 }
 
 func (j *Jogador) ExecutaLogica(cena *Cena) {
-
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		j.X -= 5
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		j.X += 5
+	}
 }
 
 func (j *Jogador) Desenha(tela *ebiten.Image) {
 	ebitenutil.DrawRect(
 		tela,
-		float64(j.Limites.Min.X),
-		float64(j.Limites.Min.Y),
-		float64(j.Limites.Size().X),
-		float64(j.Limites.Size().Y),
-		color.RGBA{255, 0, 0, 255},
+		float64(j.X-j.Tamanho/2.0),
+		float64(j.Y),
+		float64(j.Tamanho),
+		20.0,
+		color.RGBA{255, 255, 255, 255},
 	)
 }
 
@@ -84,8 +89,14 @@ func main() {
 	ebiten.SetWindowSize(telaLargura, telaAltura)
 	ebiten.SetWindowTitle(tituloJanela)
 
+	jogador := &Jogador{
+		X:       telaLargura / 2,
+		Y:       telaAltura - 64,
+		Tamanho: 80,
+	}
+
 	jogo := new(Jogo)
-	jogo.cena.AdicionaObjeto(new(Jogador))
+	jogo.cena.AdicionaObjeto(jogador)
 
 	if err := ebiten.RunGame(jogo); err != nil {
 		log.Fatal(err)
