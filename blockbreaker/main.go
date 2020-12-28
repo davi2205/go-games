@@ -10,6 +10,48 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
+type Objeto2d interface {
+	Desenha(tela *ebiten.Image)
+}
+
+type Cena struct {
+	objetos []Objeto2d
+}
+
+func (c *Cena) AdicionaObjeto(objeto Objeto2d) {
+	c.objetos = append(c.objetos, objeto)
+}
+
+func (c *Cena) DesenhaCena(tela *ebiten.Image) {
+	for _, objeto := range c.objetos {
+		objeto.Desenha(tela)
+	}
+}
+
+type Vet2 struct {
+	X, Y float32
+}
+
+type Jogador struct {
+	Limites
+}
+
+type Jogo struct {
+	cena Cena
+}
+
+func (j *Jogo) Update() error {
+	return nil
+}
+
+func (j *Jogo) Draw(screen *ebiten.Image) {
+
+}
+
+func (j *Jogo) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return outsideWidth, outsideHeight
+}
+
 const (
 	telaLargura  = 640
 	telaAltura   = 480
