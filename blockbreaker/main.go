@@ -133,9 +133,9 @@ func (g *GraficoBola) Desenha(tela *ebiten.Image, x, y float32) {
 }
 
 type Bola struct {
-	X, Y    float32
-	Raio    float32
-	grafico *GraficoBola
+	X, Y        float32
+	Raio        float32
+	graficoBola *GraficoBola
 }
 
 func (b *Bola) Inicia(jogo *Jogo) {
@@ -145,13 +145,13 @@ func (b *Bola) Inicia(jogo *Jogo) {
 		jogo.recursos["graficoBola"] = grafico
 	}
 
-	b.grafico = grafico.(*GraficoBola)
+	b.graficoBola = grafico.(*GraficoBola)
 }
 
 func (b *Bola) ExecutaLogica(jogo *Jogo) {}
 
 func (b *Bola) Desenha(tela *ebiten.Image) {
-	b.grafico.Desenha(tela, b.X, b.Y)
+	b.graficoBola.Desenha(tela, b.X, b.Y)
 }
 
 type Cena struct {
