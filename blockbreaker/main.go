@@ -5,12 +5,16 @@
 package main
 
 import (
+	"image"
+	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 )
 
 type Objeto2d interface {
+	ExecutaLogica(cena *Cena)
 	Desenha(tela *ebiten.Image)
 }
 
@@ -22,18 +26,35 @@ func (c *Cena) AdicionaObjeto(objeto Objeto2d) {
 	c.objetos = append(c.objetos, objeto)
 }
 
+func (c *Cena) ExecutaLogica() {
+	for _, objeto := range c.objetos {
+		objeto.ExecutaLogica(c)
+	}
+}
+
 func (c *Cena) Desenha(tela *ebiten.Image) {
 	for _, objeto := range c.objetos {
 		objeto.Desenha(tela)
 	}
 }
 
-type Vet2 struct {
-	X, Y float32
+type Jogador struct {
+	Limites image.Rectangle
 }
 
-type Jogador struct {
-	Limites
+func (j *Jogador) ExecutaLogica(cena *Cena) {
+
+}
+
+func (j *Jogador) Desenha(tela *ebiten.Image) {
+	ebitenutil.DrawRect(
+		tela,
+		float64(j.Limites.Min.X),
+		float64(j.Limites.Min.Y),
+		float64(j.Limites.Size().X),
+		float64(j.Limites.Size().Y),
+		color.RGBA{255, 0, 0, 255},
+	)
 }
 
 type Jogo struct {
@@ -41,6 +62,7 @@ type Jogo struct {
 }
 
 func (j *Jogo) Update() error {
+	j.cena.ExecutaLogica()
 	return nil
 }
 
@@ -61,7 +83,11 @@ const (
 func main() {
 	ebiten.SetWindowSize(telaLargura, telaAltura)
 	ebiten.SetWindowTitle(tituloJanela)
-	if err := ebiten.RunGame(&Jogo{}); err != nil {
+
+	jogo := new(Jogo)
+	jogo.cena.AdicionaObjeto(new(Jogador))
+
+	if err := ebiten.RunGame(jogo); err != nil {
 		log.Fatal(err)
 	}
 }
