@@ -11,9 +11,30 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
+
+	"net/http"
+	_ "net/http/pprof"
 )
 
 var emptyImage = ebiten.NewImage(3, 3)
+
+type Vet2 struct{ X, Y float32 }
+
+func (v Vet2) Add(other Vet2) Vet2 {
+	return Vet2{X: v.X + other.X, Y: v.Y + other.Y}
+}
+
+func (v Vet2) Sub(other Vet2) Vet2 {
+	return Vet2{X: v.X - other.X, Y: v.Y - other.Y}
+}
+
+func (v Vet2) Dot(other Vet2) float32 {
+	return v.X*other.X + v.Y*other.Y
+}
+
+func (v Vet2) Len() float32 {
+	return float32(math.Sqrt(float64(v.X*v.X + v.Y*v.Y)))
+}
 
 type Objeto2d interface {
 	Inicia(jogo *Jogo)
@@ -22,7 +43,7 @@ type Objeto2d interface {
 }
 
 type Jogador struct {
-	X, Y    float32
+	Posicao Vet2
 	Tamanho float32
 }
 
@@ -30,30 +51,30 @@ func (j *Jogador) Inicia(jogo *Jogo) {}
 
 func (j *Jogador) ExecutaLogica(jogo *Jogo) {
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		j.X -= 5
+		j.Posicao.X -= 5
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		j.X += 5
+		j.Posicao.X += 5
 	}
 
 	metade := j.Tamanho / 2
 
-	if j.X-metade < 0 {
-		j.X = metade
+	if j.Posicao.X-metade < 0 {
+		j.Posicao.X = metade
 	}
-	if j.X+metade > float32(jogo.telaLargura) {
-		j.X = float32(jogo.telaLargura) - metade
+	if j.Posicao.X+metade > float32(jogo.telaLargura) {
+		j.Posicao.X = float32(jogo.telaLargura) - metade
 	}
 }
 
 func (j *Jogador) Desenha(tela *ebiten.Image) {
 	ebitenutil.DrawRect(
 		tela,
-		float64(j.X-j.Tamanho/2.0),
-		float64(j.Y),
+		float64(j.Posicao.X-j.Tamanho/2.0),
+		float64(j.Posicao.Y),
 		float64(j.Tamanho),
 		20.0,
-		color.RGBA{255, 255, 255, 255},
+		&color.White,
 	)
 }
 
@@ -65,9 +86,9 @@ type GraficoBola struct {
 
 func NovoGraficoBola(numVertices int, raio float32) *GraficoBola {
 	var (
-		indices               = []uint16{}
-		vertices              = []ebiten.Vertex{}
-		verticesTransformados = []ebiten.Vertex{}
+		indices               = make([]uint16, 0, numVertices)
+		vertices              = make([]ebiten.Vertex, 0, numVertices+1)
+		verticesTransformados = make([]ebiten.Vertex, 0, numVertices+1)
 	)
 
 	for i := 0; i < numVertices; i++ {
@@ -133,25 +154,32 @@ func (g *GraficoBola) Desenha(tela *ebiten.Image, x, y float32) {
 }
 
 type Bola struct {
-	X, Y        float32
+	Posicao     Vet2
+	Velocidade  Vet2
 	Raio        float32
 	graficoBola *GraficoBola
+}
+
+func (b *Bola) Reflete(normal Vet2) {
+	normal.Len()
 }
 
 func (b *Bola) Inicia(jogo *Jogo) {
 	grafico, ok := jogo.recursos["graficoBola"]
 	if !ok {
-		grafico = NovoGraficoBola(10, b.Raio)
+		grafico = NovoGraficoBola(16, b.Raio)
 		jogo.recursos["graficoBola"] = grafico
 	}
 
 	b.graficoBola = grafico.(*GraficoBola)
 }
 
-func (b *Bola) ExecutaLogica(jogo *Jogo) {}
+func (b *Bola) ExecutaLogica(jogo *Jogo) {
+	b.Posicao = b.Posicao.Add(b.Velocidade)
+}
 
 func (b *Bola) Desenha(tela *ebiten.Image) {
-	b.graficoBola.Desenha(tela, b.X, b.Y)
+	b.graficoBola.Desenha(tela, b.Posicao.X, b.Posicao.Y)
 }
 
 type Cena struct {
@@ -208,20 +236,32 @@ const (
 )
 
 func main() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	ebiten.SetWindowSize(telaLargura, telaAltura)
 	ebiten.SetWindowTitle(tituloJanela)
 
 	emptyImage.Fill(color.White)
 
 	jogador := &Jogador{
-		X:       telaLargura / 2,
-		Y:       telaAltura - 64,
+		Posicao: Vet2{
+			X: telaLargura / 2,
+			Y: telaAltura - 64,
+		},
 		Tamanho: 80,
 	}
 
 	bola := &Bola{
-		X:    telaLargura / 2,
-		Y:    telaAltura / 2,
+		Posicao: Vet2{
+			X: telaLargura / 2,
+			Y: telaAltura / 2,
+		},
+		Velocidade: Vet2{
+			X: 1.0,
+			Y: 1.0,
+		},
 		Raio: 16,
 	}
 
