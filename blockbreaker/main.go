@@ -22,7 +22,7 @@ func (c *Cena) AdicionaObjeto(objeto Objeto2d) {
 	c.objetos = append(c.objetos, objeto)
 }
 
-func (c *Cena) DesenhaCena(tela *ebiten.Image) {
+func (c *Cena) Desenha(tela *ebiten.Image) {
 	for _, objeto := range c.objetos {
 		objeto.Desenha(tela)
 	}
@@ -45,7 +45,7 @@ func (j *Jogo) Update() error {
 }
 
 func (j *Jogo) Draw(screen *ebiten.Image) {
-
+	j.cena.Desenha(screen)
 }
 
 func (j *Jogo) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
