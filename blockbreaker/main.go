@@ -5,7 +5,6 @@
 package main
 
 import (
-	"image"
 	"image/color"
 	"log"
 	"math"
@@ -59,39 +58,41 @@ func (j *Jogador) Desenha(tela *ebiten.Image) {
 }
 
 type GraficoBola struct {
-	indices             []uint16
-	vertices            []ebiten.Vertex
-	verticesTransformed []ebiten.Vertex
+	indices               []uint16
+	vertices              []ebiten.Vertex
+	verticesTransformados []ebiten.Vertex
 }
 
 func NovoGraficoBola(numVertices int, raio float32) *GraficoBola {
 	var (
-		indices             = []uint16{}
-		vertices            = []ebiten.Vertex{}
-		verticesTransformed = []ebiten.Vertex{}
+		indices               = []uint16{}
+		vertices              = []ebiten.Vertex{}
+		verticesTransformados = []ebiten.Vertex{}
 	)
 
 	for i := 0; i < numVertices; i++ {
-		rate := float64(i) / float64(numVertices)
+		racio := float64(i) / float64(numVertices)
 		cr := 0.0
 		cg := 0.0
 		cb := 0.0
-		if rate < 1.0/3.0 {
-			cb = 2 - 2*(rate*3)
-			cr = 2 * (rate * 3)
+		if racio < 1.0/3.0 {
+			cb = 2 - 2*(racio*3)
+			cr = 2 * (racio * 3)
 		}
-		if 1.0/3.0 <= rate && rate < 2.0/3.0 {
-			cr = 2 - 2*(rate-1.0/3.0)*3
-			cg = 2 * (rate - 1.0/3.0) * 3
+		if 1.0/3.0 <= racio && racio < 2.0/3.0 {
+			cr = 2 - 2*(racio-1.0/3.0)*3
+			cg = 2 * (racio - 1.0/3.0) * 3
 		}
-		if 2.0/3.0 <= rate {
-			cg = 2 - 2*(rate-2.0/3.0)*3
-			cb = 2 * (rate - 2.0/3.0) * 3
+		if 2.0/3.0 <= racio {
+			cg = 2 - 2*(racio-2.0/3.0)*3
+			cb = 2 * (racio - 2.0/3.0) * 3
 		}
 
+		indices = append(indices, uint16(i), uint16(i+1)%uint16(numVertices), uint16(numVertices))
+
 		vertice := ebiten.Vertex{
-			DstX:   float32(float64(raio) * math.Cos(2*math.Pi*rate)),
-			DstY:   float32(float64(raio) * math.Sin(2*math.Pi*rate)),
+			DstX:   float32(float64(raio) * math.Cos(2*math.Pi*racio)),
+			DstY:   float32(float64(raio) * math.Sin(2*math.Pi*racio)),
 			SrcX:   0,
 			SrcY:   0,
 			ColorR: float32(cr),
@@ -100,9 +101,7 @@ func NovoGraficoBola(numVertices int, raio float32) *GraficoBola {
 			ColorA: 1,
 		}
 		vertices = append(vertices, vertice)
-		verticesTransformed = append(verticesTransformed, vertice)
-
-		indices = append(indices, uint16(i), uint16(i+1)%uint16(numVertices), uint16(numVertices))
+		verticesTransformados = append(verticesTransformados, vertice)
 	}
 
 	vertice := ebiten.Vertex{
@@ -116,23 +115,21 @@ func NovoGraficoBola(numVertices int, raio float32) *GraficoBola {
 		ColorA: 1,
 	}
 	vertices = append(vertices, vertice)
-	verticesTransformed = append(verticesTransformed, vertice)
+	verticesTransformados = append(verticesTransformados, vertice)
 
 	return &GraficoBola{
-		indices:             indices,
-		vertices:            vertices,
-		verticesTransformed: verticesTransformed,
+		indices:               indices,
+		vertices:              vertices,
+		verticesTransformados: verticesTransformados,
 	}
 }
 
 func (g *GraficoBola) Desenha(tela *ebiten.Image, x, y float32) {
-	for i, vertex := range g.vertices {
-		g.verticesTransformed[i].DstX = x + vertex.DstX
-		g.verticesTransformed[i].DstY = y + vertex.DstY
+	for i, vertice := range g.vertices {
+		g.verticesTransformados[i].DstX = x + vertice.DstX
+		g.verticesTransformados[i].DstY = y + vertice.DstY
 	}
-	op := &ebiten.DrawTrianglesOptions{}
-	op.Address = ebiten.AddressUnsafe
-	tela.DrawTriangles(g.verticesTransformed, g.indices, emptyImage.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image), op)
+	tela.DrawTriangles(g.verticesTransformados, g.indices, emptyImage, nil)
 }
 
 type Bola struct {
