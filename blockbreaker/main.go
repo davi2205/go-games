@@ -16,6 +16,16 @@ import (
 	_ "net/http/pprof"
 )
 
+func limita(valor, minimo, maximo float32) float32 {
+	if valor < minimo {
+		return minimo
+	} else if valor > maximo {
+		return maximo
+	} else {
+		return valor
+	}
+}
+
 var emptyImage = ebiten.NewImage(3, 3)
 
 type Vet2 struct{ X, Y float32 }
@@ -38,6 +48,11 @@ func (v Vet2) ProdutoEscalar(other Vet2) float32 {
 
 func (v Vet2) Tamanho() float32 {
 	return float32(math.Sqrt(float64(v.X*v.X + v.Y*v.Y)))
+}
+
+func (v Vet2) FormaNormal() Vet2 {
+	tamanho := v.Tamanho()
+	return Vet2{v.X / tamanho, v.Y / tamanho}
 }
 
 type Objeto2d interface {
@@ -198,6 +213,32 @@ func (b *Bola) ExecutaLogica(jogo *Jogo) {
 		b.Reflete(Vet2{0.0, 1.0})
 	}
 
+	for _, objetoGenerico := range jogo.cena.objetos {
+		switch objeto := objetoGenerico.(type) {
+		case *Jogador:
+			metadeTamanhoJogador := objeto.Tamanho / 2
+
+			pontoDeContato := Vet2{
+				limita(b.Posicao.X, objeto.Posicao.X-metadeTamanhoJogador, objeto.Posicao.X+metadeTamanhoJogador),
+				limita(b.Posicao.Y, objeto.Posicao.Y, objeto.Posicao.Y+20.0),
+			}
+
+			var (
+				delta        = b.Posicao.Menos(pontoDeContato)
+				deltaTamanho = delta.Tamanho()
+			)
+
+			if deltaTamanho > b.Raio || math.Abs(float64(deltaTamanho)) < 0.0001 {
+				break
+			}
+
+			deltaNormalizado := delta.FormaNormal()
+
+			b.Posicao = pontoDeContato.Mais(deltaNormalizado.VezesEscalar(b.Raio))
+			b.Reflete(deltaNormalizado)
+		}
+	}
+
 	b.Posicao = b.Posicao.Mais(b.Velocidade)
 }
 
@@ -276,7 +317,7 @@ func main() {
 	bola := &Bola{
 		Posicao:    Vet2{telaLargura / 2, telaAltura / 2},
 		Velocidade: Vet2{4.0, 4.0},
-		Raio:       16,
+		Raio:       12,
 	}
 
 	jogo := &Jogo{
