@@ -11,6 +11,12 @@ type jogo struct {
 	objetosATestarColisao []objeto2d
 }
 
+func (j *jogo) inicia() {
+	for _, objeto := range j.objetos {
+		objeto.inicia()
+	}
+}
+
 func (j *jogo) adicionaObjeto(objeto objeto2d) {
 	j.objetos = append(j.objetos, objeto)
 }

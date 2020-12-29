@@ -6,12 +6,13 @@ package main
 
 import (
 	"math"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten"
 )
 
 type bola struct {
-	posicao    vet2
+	centro     vet2
 	velocidade vet2
 	raio       float32
 }
@@ -26,49 +27,74 @@ func (b *bola) reflete(normal vet2) {
 	b.velocidade = b.velocidade.menos(normal.vezesEscalar(2.0 * prodEscVelNormal))
 }
 
-func (b *bola) inicia() {}
+func (b *bola) inicia() {
+	b.velocidade = vet2{rand.Float32(), -rand.Float32()}
+	b.velocidade.setTamanho(7.0)
+}
 
 func (b *bola) executaLogica() {
-	if b.posicao.x+b.raio > float32(telaLargura) {
+	if b.centro.x+b.raio > float32(telaLargura) {
 		b.reflete(vet2{-1.0, 0.0})
 	}
-	if b.posicao.x-b.raio < 0.0 {
+	if b.centro.x-b.raio < 0.0 {
 		b.reflete(vet2{1.0, 0.0})
 	}
-	if b.posicao.y+b.raio > float32(telaAltura) {
+	if b.centro.y+b.raio > float32(telaAltura) {
 		b.reflete(vet2{0.0, -1.0})
 	}
-	if b.posicao.y-b.raio < 0.0 {
+	if b.centro.y-b.raio < 0.0 {
 		b.reflete(vet2{0.0, 1.0})
 	}
 
-	b.posicao = b.posicao.mais(b.velocidade)
+	b.centro = b.centro.mais(b.velocidade)
 }
 
 func (b *bola) testaColisao(objetoGenerico objeto2d) {
+	var (
+		pontoDeContato vet2
+		normal         vet2
+		distancia      float32
+	)
+
 	switch objeto := objetoGenerico.(type) {
 	case *jogador:
-		pontoDeContato := vet2{
-			limita(b.posicao.x, objeto.posicao.x, objeto.posicao.x+objeto.tamanho.x),
-			limita(b.posicao.y, objeto.posicao.y, objeto.posicao.y+objeto.tamanho.y),
+		pontoDeContato = vet2{
+			limita(b.centro.x, objeto.posicao.x, objeto.posicao.x+objeto.tamanho.x),
+			limita(b.centro.y, objeto.posicao.y, objeto.posicao.y+objeto.tamanho.y),
 		}
 
-		var (
-			delta        = b.posicao.menos(pontoDeContato)
-			deltaTamanho = delta.tamanho()
-		)
+		direcao, tamanho, ok := b.centro.menos(pontoDeContato).direcaoETamanho()
 
-		if deltaTamanho > b.raio || math.Abs(float64(deltaTamanho)) < 0.0001 {
-			break
+		if !ok {
+			return
 		}
 
-		deltaNormalizado := delta.formaNormal()
+		normal = direcao
+		distancia = tamanho
+	case *bola:
+		direcao, tamanho, ok := b.centro.menos(objeto.centro).direcaoETamanho()
 
-		b.posicao = pontoDeContato.mais(deltaNormalizado.vezesEscalar(b.raio))
-		b.reflete(deltaNormalizado)
+		if !ok {
+			return
+		}
+
+		pontoDeContato = direcao.vezesEscalar(objeto.raio).mais(objeto.centro)
+		normal = direcao
+		distancia = float32(math.Abs(float64(tamanho - objeto.raio)))
+	default:
+		return
 	}
+
+	if distancia > b.raio {
+		return
+	}
+
+	respostaColisao := pontoDeContato.menos(b.centro.mais(normal.vezesEscalar(-b.raio)))
+
+	b.centro = b.centro.mais(respostaColisao)
+	b.reflete(normal)
 }
 
 func (b *bola) desenha(tela *ebiten.Image) {
-	desenhaBola(tela, b.posicao.x, b.posicao.y, b.raio, 16)
+	desenhaBola(tela, b.centro.x, b.centro.y, b.raio, 16)
 }

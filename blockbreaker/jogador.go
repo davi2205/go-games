@@ -19,10 +19,10 @@ func (j *jogador) inicia() {}
 
 func (j *jogador) executaLogica() {
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		j.posicao.x -= 5
+		j.posicao.x -= 10
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		j.posicao.x += 5
+		j.posicao.x += 10
 	}
 
 	if j.posicao.x < 0 {
