@@ -20,19 +20,23 @@ var emptyImage = ebiten.NewImage(3, 3)
 
 type Vet2 struct{ X, Y float32 }
 
-func (v Vet2) Add(other Vet2) Vet2 {
-	return Vet2{X: v.X + other.X, Y: v.Y + other.Y}
+func (v Vet2) Mais(other Vet2) Vet2 {
+	return Vet2{v.X + other.X, v.Y + other.Y}
 }
 
-func (v Vet2) Sub(other Vet2) Vet2 {
-	return Vet2{X: v.X - other.X, Y: v.Y - other.Y}
+func (v Vet2) Menos(other Vet2) Vet2 {
+	return Vet2{v.X - other.X, v.Y - other.Y}
 }
 
-func (v Vet2) Dot(other Vet2) float32 {
+func (v Vet2) VezesEscalar(scalar float32) Vet2 {
+	return Vet2{v.X * scalar, v.Y * scalar}
+}
+
+func (v Vet2) ProdutoEscalar(other Vet2) float32 {
 	return v.X*other.X + v.Y*other.Y
 }
 
-func (v Vet2) Len() float32 {
+func (v Vet2) Tamanho() float32 {
 	return float32(math.Sqrt(float64(v.X*v.X + v.Y*v.Y)))
 }
 
@@ -161,7 +165,13 @@ type Bola struct {
 }
 
 func (b *Bola) Reflete(normal Vet2) {
-	normal.Len()
+	prodEscVelNormal := b.Velocidade.ProdutoEscalar(normal)
+
+	if prodEscVelNormal >= 0.0 {
+		return
+	}
+
+	b.Velocidade = b.Velocidade.Menos(normal.VezesEscalar(2.0 * prodEscVelNormal))
 }
 
 func (b *Bola) Inicia(jogo *Jogo) {
@@ -175,7 +185,20 @@ func (b *Bola) Inicia(jogo *Jogo) {
 }
 
 func (b *Bola) ExecutaLogica(jogo *Jogo) {
-	b.Posicao = b.Posicao.Add(b.Velocidade)
+	if b.Posicao.X+b.Raio > float32(jogo.telaLargura) {
+		b.Reflete(Vet2{-1.0, 0.0})
+	}
+	if b.Posicao.X-b.Raio < 0.0 {
+		b.Reflete(Vet2{1.0, 0.0})
+	}
+	if b.Posicao.Y+b.Raio > float32(jogo.telaAltura) {
+		b.Reflete(Vet2{0.0, -1.0})
+	}
+	if b.Posicao.Y-b.Raio < 0.0 {
+		b.Reflete(Vet2{0.0, 1.0})
+	}
+
+	b.Posicao = b.Posicao.Mais(b.Velocidade)
 }
 
 func (b *Bola) Desenha(tela *ebiten.Image) {
@@ -246,23 +269,14 @@ func main() {
 	emptyImage.Fill(color.White)
 
 	jogador := &Jogador{
-		Posicao: Vet2{
-			X: telaLargura / 2,
-			Y: telaAltura - 64,
-		},
+		Posicao: Vet2{telaLargura / 2, telaAltura - 64},
 		Tamanho: 80,
 	}
 
 	bola := &Bola{
-		Posicao: Vet2{
-			X: telaLargura / 2,
-			Y: telaAltura / 2,
-		},
-		Velocidade: Vet2{
-			X: 1.0,
-			Y: 1.0,
-		},
-		Raio: 16,
+		Posicao:    Vet2{telaLargura / 2, telaAltura / 2},
+		Velocidade: Vet2{4.0, 4.0},
+		Raio:       16,
 	}
 
 	jogo := &Jogo{
