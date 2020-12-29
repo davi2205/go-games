@@ -16,6 +16,26 @@ import (
 	_ "net/http/pprof"
 )
 
+const (
+	telaLargura  = 640
+	telaAltura   = 480
+	tituloJanela = "BlockBreaker by Davi Villalva"
+)
+
+var mapa = [9][9]uint8{
+	{7, 7, 7, 7, 7, 7, 7, 7, 7},
+	{7, 7, 7, 7, 7, 7, 7, 7, 7},
+	{7, 7, 7, 7, 7, 7, 7, 7, 7},
+	{7, 7, 7, 7, 7, 7, 7, 7, 7},
+	{7, 7, 7, 7, 7, 7, 7, 7, 7},
+	{7, 7, 7, 7, 7, 7, 7, 7, 7},
+	{7, 7, 7, 7, 7, 7, 7, 7, 7},
+	{7, 7, 7, 7, 7, 7, 7, 7, 7},
+	{7, 7, 7, 7, 7, 7, 7, 7, 7},
+}
+
+var emptyImage = ebiten.NewImage(3, 3)
+
 func limita(valor, minimo, maximo float32) float32 {
 	if valor < minimo {
 		return minimo
@@ -25,8 +45,6 @@ func limita(valor, minimo, maximo float32) float32 {
 		return valor
 	}
 }
-
-var emptyImage = ebiten.NewImage(3, 3)
 
 type Vet2 struct{ X, Y float32 }
 
@@ -246,6 +264,18 @@ func (b *Bola) Desenha(tela *ebiten.Image) {
 	b.graficoBola.Desenha(tela, b.Posicao.X, b.Posicao.Y)
 }
 
+type Tijolo struct {
+	Posicao Vet2
+	Tamanho Vet2
+	Vida    uint8
+}
+
+func (t *Tijolo) Inicia(jogo *Jogo) {}
+
+func (t *Tijolo) ExecutaLogica(jogo *Jogo) {}
+
+func (t *Tijolo) Desenha(tela *ebiten.Image) {}
+
 type Cena struct {
 	objetos []Objeto2d
 }
@@ -292,12 +322,6 @@ func (j *Jogo) Draw(screen *ebiten.Image) {
 func (j *Jogo) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return outsideWidth, outsideHeight
 }
-
-const (
-	telaLargura  = 640
-	telaAltura   = 480
-	tituloJanela = "BlockBreaker by Davi Villalva"
-)
 
 func main() {
 	go func() {
