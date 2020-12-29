@@ -333,22 +333,22 @@ func main() {
 
 	emptyImage.Fill(color.White)
 
+	jogo := &Jogo{
+		telaLargura: telaLargura,
+		telaAltura:  telaAltura,
+	}
+
 	jogador := &Jogador{
 		Posicao: Vet2{telaLargura / 2, telaAltura - 64},
 		Tamanho: 80,
 	}
+	jogo.cena.AdicionaObjeto(jogador)
 
 	bola := &Bola{
 		Posicao:    Vet2{telaLargura / 2, telaAltura / 2},
 		Velocidade: Vet2{4.0, 4.0},
 		Raio:       12,
 	}
-
-	jogo := &Jogo{
-		telaLargura: telaLargura,
-		telaAltura:  telaAltura,
-	}
-	jogo.cena.AdicionaObjeto(jogador)
 	jogo.cena.AdicionaObjeto(bola)
 
 	jogo.Inicia()
