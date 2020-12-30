@@ -13,10 +13,18 @@ import (
 
 var coresTijolo = []color.RGBA{
 	{255, 0, 0, 255},
+	{255, 128, 0, 255},
 	{255, 255, 0, 255},
+
+	{128, 255, 0, 255},
 	{0, 255, 0, 255},
+	{0, 255, 128, 255},
+
 	{0, 255, 255, 255},
+	{0, 128, 255, 255},
 	{0, 0, 255, 255},
+
+	{128, 0, 255, 255},
 	{255, 0, 255, 255},
 }
 
@@ -39,7 +47,6 @@ func (t *tijolo) desenha(tela *ebiten.Image) {
 	if !t.estaVivo() {
 		return
 	}
-
 	ebitenutil.DrawRect(
 		tela,
 		float64(t.posicao.x), float64(t.posicao.y),

@@ -6,6 +6,12 @@ package main
 
 import "math"
 
+/*
+	A função de testaColisao só suporta os seguintes tipos de colisão
+	bola - jogador
+	bola - tijolo
+	bola - bola
+*/
 func testaColisao(sujeitoGenerico, objetoGenerico objeto2d) (colisao colisao, colidiu bool) {
 	sujeito, ok := sujeitoGenerico.(*bola)
 
@@ -26,8 +32,6 @@ func testaColisao(sujeitoGenerico, objetoGenerico objeto2d) (colisao colisao, co
 			return
 		}
 
-		colisao.sujeito = sujeito
-		colisao.objeto = objeto
 		colisao.pontoDeContato = pontoDeContato
 		colisao.normal = direcao
 		colisao.distancia = tamanho
@@ -44,8 +48,6 @@ func testaColisao(sujeitoGenerico, objetoGenerico objeto2d) (colisao colisao, co
 			return
 		}
 
-		colisao.sujeito = sujeito
-		colisao.objeto = objeto
 		colisao.pontoDeContato = pontoDeContato
 		colisao.normal = direcao
 		colisao.distancia = tamanho
@@ -57,12 +59,15 @@ func testaColisao(sujeitoGenerico, objetoGenerico objeto2d) (colisao colisao, co
 			return
 		}
 
-		colisao.sujeito = sujeito
-		colisao.objeto = objeto
 		colisao.pontoDeContato = direcao.vezesEscalar(objeto.raio).mais(objeto.centro)
 		colisao.normal = direcao
 		colisao.distancia = float32(math.Abs(float64(tamanho - objeto.raio)))
 		colidiu = colisao.distancia <= sujeito.raio
+	default:
+		return
 	}
+
+	colisao.sujeito = sujeitoGenerico
+	colisao.objeto = objetoGenerico
 	return
 }

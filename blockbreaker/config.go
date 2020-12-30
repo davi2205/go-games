@@ -7,5 +7,5 @@ package main
 const (
 	telaLargura  = 640
 	telaAltura   = 480
-	tituloJanela = "BlockBreaker by Davi Villalva"
+	tituloJanela = "BlockBreaker em Go"
 )

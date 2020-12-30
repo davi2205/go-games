@@ -10,6 +10,20 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
+var mapa = [11][10]int{
+	{10, 10, 10, 10, 10, 10, 10, 10, 10, 10},
+	{9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
+	{8, 8, 8, 8, 8, 8, 8, 8, 8, 8},
+	{7, 7, 7, 7, 7, 7, 7, 7, 7, 7},
+	{6, 6, 6, 6, 6, 6, 6, 6, 6, 6},
+	{5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+	{4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+	{3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+	{2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+}
+
 func main() {
 	ebiten.SetWindowSize(telaLargura, telaAltura)
 	ebiten.SetWindowTitle(tituloJanela)
@@ -24,20 +38,44 @@ func main() {
 	}
 	jogo.adicionaObjeto(jogador)
 
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 40; i++ {
 		bola := &bola{
 			centro: vet2{30 + float32(i*20), telaAltura / 2},
 			raio:   12,
 		}
 		jogo.adicionaObjeto(bola)
 	}
-
-	tijolo := &tijolo{
-		posicao: vet2{60, 100},
-		tamanho: vet2{80, 20},
-		vida:    5,
+	bola := &bola{
+		centro: vet2{telaLargura / 2, telaAltura / 2},
+		raio:   12,
 	}
-	jogo.adicionaObjeto(tijolo)
+	jogo.adicionaObjeto(bola)
+
+	var (
+		margemTijolos float32 = 60.0
+		margemTijolo  float32 = 4.0
+		tijoloTamanho         = vet2{
+			(float32(telaLargura) - margemTijolos*2) / float32(len(mapa[0])),
+			(float32(telaAltura)/1.5 - margemTijolos*2) / float32(len(mapa)),
+		}
+	)
+
+	for j := 0; j < len(mapa); j++ {
+		for i := 0; i < len(mapa[j]); i++ {
+			tijolo := &tijolo{
+				posicao: vet2{
+					margemTijolos + float32(margemTijolo/2) + float32(i)*tijoloTamanho.x,
+					margemTijolos + float32(margemTijolo/2) + float32(j)*tijoloTamanho.y,
+				},
+				tamanho: vet2{
+					tijoloTamanho.x - float32(margemTijolo),
+					tijoloTamanho.y - float32(margemTijolo),
+				},
+				vida: mapa[j][i],
+			}
+			jogo.adicionaObjeto(tijolo)
+		}
+	}
 
 	jogo.inicia()
 	if err := ebiten.RunGame(jogo); err != nil {

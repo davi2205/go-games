@@ -28,7 +28,7 @@ func (b *bola) reflete(normal vet2) {
 
 func (b *bola) inicia() {
 	b.velocidade = vet2{rand.Float32(), -rand.Float32()}
-	b.velocidade.setTamanho(7.0)
+	b.velocidade.setTamanho(6.0)
 }
 
 func (b *bola) estaVivo() bool { return true }
