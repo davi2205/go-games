@@ -4,11 +4,6 @@
 
 package main
 
-import "github.com/hajimehoshi/ebiten"
+func testaColisao(a, b objeto2d) colisao {
 
-type objeto2d interface {
-	inicia()
-	executaLogica()
-	testaColisao(objeto objeto2d)
-	desenha(tela *ebiten.Image)
 }

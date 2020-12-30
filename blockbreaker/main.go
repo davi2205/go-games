@@ -22,13 +22,20 @@ func main() {
 	}
 	jogo.adicionaObjeto(jogador)
 
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 5; i++ {
 		bola := &bola{
 			centro: vet2{30 + float32(i*20), telaAltura / 2},
 			raio:   12,
 		}
 		jogo.adicionaObjetoATestarColisao(bola)
 	}
+
+	tijolo := &tijolo{
+		posicao: vet2{60, 100},
+		tamanho: vet2{80, 20},
+		vida:    5,
+	}
+	jogo.adicionaObjeto(tijolo)
 
 	jogo.inicia()
 	if err := ebiten.RunGame(jogo); err != nil {

@@ -49,6 +49,8 @@ func (b *bola) executaLogica() {
 	b.centro = b.centro.mais(b.velocidade)
 }
 
+func (b *bola) estaVivo() bool { return true }
+
 func (b *bola) testaColisao(objetoGenerico objeto2d) {
 	var (
 		pontoDeContato vet2
@@ -71,6 +73,24 @@ func (b *bola) testaColisao(objetoGenerico objeto2d) {
 
 		normal = direcao
 		distancia = tamanho
+	case *tijolo:
+		pontoDeContato = vet2{
+			limita(b.centro.x, objeto.posicao.x, objeto.posicao.x+objeto.tamanho.x),
+			limita(b.centro.y, objeto.posicao.y, objeto.posicao.y+objeto.tamanho.y),
+		}
+
+		direcao, tamanho, ok := b.centro.menos(pontoDeContato).direcaoETamanho()
+
+		if !ok {
+			return
+		}
+
+		normal = direcao
+		distancia = tamanho
+
+		if distancia <= b.raio {
+			objeto.vida--
+		}
 	case *bola:
 		direcao, tamanho, ok := b.centro.menos(objeto.centro).direcaoETamanho()
 

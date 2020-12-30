@@ -33,6 +33,8 @@ func (j *jogador) executaLogica() {
 	}
 }
 
+func (j *jogador) estaVivo() bool { return true }
+
 func (j *jogador) testaColisao(objeto objeto2d) {}
 
 func (j *jogador) desenha(tela *ebiten.Image) {
