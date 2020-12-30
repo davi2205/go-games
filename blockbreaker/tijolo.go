@@ -27,13 +27,13 @@ type tijolo struct {
 
 func (t *tijolo) inicia() {}
 
+func (t *tijolo) estaVivo() bool { return t.vida >= 0 }
+
+func (t *tijolo) deveTestarColisao() bool { return false }
+
 func (t *tijolo) executaLogica() {}
 
-func (t *tijolo) estaVivo() bool {
-	return t.vida >= 0
-}
-
-func (t *tijolo) testaColisao(objeto objeto2d) {}
+func (t *tijolo) colidiuCom(colisao colisao) {}
 
 func (t *tijolo) desenha(tela *ebiten.Image) {
 	if !t.estaVivo() {

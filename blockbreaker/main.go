@@ -14,7 +14,9 @@ func main() {
 	ebiten.SetWindowSize(telaLargura, telaAltura)
 	ebiten.SetWindowTitle(tituloJanela)
 
-	jogo := &jogo{}
+	jogo := &jogo{
+		testaColisao: testaColisao,
+	}
 
 	jogador := &jogador{
 		posicao: vet2{telaLargura/2 - 40, telaAltura - 64},
@@ -22,12 +24,12 @@ func main() {
 	}
 	jogo.adicionaObjeto(jogador)
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 1; i++ {
 		bola := &bola{
 			centro: vet2{30 + float32(i*20), telaAltura / 2},
 			raio:   12,
 		}
-		jogo.adicionaObjetoATestarColisao(bola)
+		jogo.adicionaObjeto(bola)
 	}
 
 	tijolo := &tijolo{

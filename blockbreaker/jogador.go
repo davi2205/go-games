@@ -17,6 +17,10 @@ type jogador struct {
 
 func (j *jogador) inicia() {}
 
+func (j *jogador) estaVivo() bool { return true }
+
+func (j *jogador) deveTestarColisao() bool { return false }
+
 func (j *jogador) executaLogica() {
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		j.posicao.x -= 10
@@ -33,9 +37,7 @@ func (j *jogador) executaLogica() {
 	}
 }
 
-func (j *jogador) estaVivo() bool { return true }
-
-func (j *jogador) testaColisao(objeto objeto2d) {}
+func (j *jogador) colidiuCom(colisao colisao) {}
 
 func (j *jogador) desenha(tela *ebiten.Image) {
 	ebitenutil.DrawRect(

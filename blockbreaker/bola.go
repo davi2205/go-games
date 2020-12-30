@@ -5,7 +5,6 @@
 package main
 
 import (
-	"math"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten"
@@ -32,6 +31,10 @@ func (b *bola) inicia() {
 	b.velocidade.setTamanho(7.0)
 }
 
+func (b *bola) estaVivo() bool { return true }
+
+func (b *bola) deveTestarColisao() bool { return true }
+
 func (b *bola) executaLogica() {
 	if b.centro.x+b.raio > float32(telaLargura) {
 		b.reflete(vet2{-1.0, 0.0})
@@ -49,70 +52,14 @@ func (b *bola) executaLogica() {
 	b.centro = b.centro.mais(b.velocidade)
 }
 
-func (b *bola) estaVivo() bool { return true }
+func (b *bola) colidiuCom(colisao colisao) {
+	delta := colisao.pontoDeContato.menos(b.centro.mais(colisao.normal.vezesEscalar(-b.raio)))
+	b.centro = b.centro.mais(delta)
+	b.reflete(colisao.normal)
 
-func (b *bola) testaColisao(objetoGenerico objeto2d) {
-	var (
-		pontoDeContato vet2
-		normal         vet2
-		distancia      float32
-	)
-
-	switch objeto := objetoGenerico.(type) {
-	case *jogador:
-		pontoDeContato = vet2{
-			limita(b.centro.x, objeto.posicao.x, objeto.posicao.x+objeto.tamanho.x),
-			limita(b.centro.y, objeto.posicao.y, objeto.posicao.y+objeto.tamanho.y),
-		}
-
-		direcao, tamanho, ok := b.centro.menos(pontoDeContato).direcaoETamanho()
-
-		if !ok {
-			return
-		}
-
-		normal = direcao
-		distancia = tamanho
-	case *tijolo:
-		pontoDeContato = vet2{
-			limita(b.centro.x, objeto.posicao.x, objeto.posicao.x+objeto.tamanho.x),
-			limita(b.centro.y, objeto.posicao.y, objeto.posicao.y+objeto.tamanho.y),
-		}
-
-		direcao, tamanho, ok := b.centro.menos(pontoDeContato).direcaoETamanho()
-
-		if !ok {
-			return
-		}
-
-		normal = direcao
-		distancia = tamanho
-
-		if distancia <= b.raio {
-			objeto.vida--
-		}
-	case *bola:
-		direcao, tamanho, ok := b.centro.menos(objeto.centro).direcaoETamanho()
-
-		if !ok {
-			return
-		}
-
-		pontoDeContato = direcao.vezesEscalar(objeto.raio).mais(objeto.centro)
-		normal = direcao
-		distancia = float32(math.Abs(float64(tamanho - objeto.raio)))
-	default:
-		return
+	if tijolo, ok := colisao.objeto.(*tijolo); ok {
+		tijolo.vida--
 	}
-
-	if distancia > b.raio {
-		return
-	}
-
-	respostaColisao := pontoDeContato.menos(b.centro.mais(normal.vezesEscalar(-b.raio)))
-
-	b.centro = b.centro.mais(respostaColisao)
-	b.reflete(normal)
 }
 
 func (b *bola) desenha(tela *ebiten.Image) {
