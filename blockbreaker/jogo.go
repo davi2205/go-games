@@ -25,9 +25,10 @@ type objeto2d interface {
 }
 
 type jogo struct {
-	objetos      []objeto2d
-	testaColisao func(a, b objeto2d) colisao
-	colisoes     []colisao
+	objetos         []objeto2d
+	testaColisao    func(a, b objeto2d) colisao
+	colisoes        []colisao
+	indicesAExcluir []int
 }
 
 func (j *jogo) inicia() {
@@ -44,24 +45,38 @@ func (j *jogo) adicionaObjeto(objeto objeto2d) {
 
 func (j *jogo) Update() error {
 	j.colisoes = j.colisoes[:0]
-	for _, objeto := range j.objetos {
+	j.indicesAExcluir = j.indicesAExcluir[:0]
+
+	for indice, objeto := range j.objetos {
 		objeto.executaLogica()
 
 		if objeto.deveTestarColisao() {
 			for _, outroObjeto := range j.objetos {
 				if outroObjeto != objeto {
 					colisao := j.testaColisao(objeto, outroObjeto)
-
 					if colisao.ocorreu {
 						j.colisoes = append(j.colisoes, colisao)
 					}
 				}
 			}
 		}
+
+		if !objeto.estaVivo() {
+			j.indicesAExcluir = append(j.indicesAExcluir, indice)
+		}
 	}
+
 	for _, colisao := range j.colisoes {
 		colisao.sujeito.colidiuCom(colisao.objeto, colisao)
 	}
+
+	for indice, indiceEmObjetos := range j.indicesAExcluir {
+		ultimoIndiceEmObjetos := len(j.objetos) - (1 + indice)
+		j.objetos[indiceEmObjetos] = j.objetos[ultimoIndiceEmObjetos]
+		j.objetos[ultimoIndiceEmObjetos] = nil
+	}
+	j.objetos = j.objetos[:len(j.objetos)-len(j.indicesAExcluir)]
+
 	return nil
 }
 
