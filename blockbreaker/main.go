@@ -33,21 +33,14 @@ func main() {
 	}
 
 	jogador := &jogador{
-		posicao: vet2{telaLargura/2 - 40, telaAltura - 64},
-		tamanho: vet2{80, 20},
+		posicao: vet2{telaLargura/2 - 40, telaAltura - 32},
+		tamanho: vet2{80, 10},
 	}
 	jogo.adicionaObjeto(jogador)
 
-	for i := 0; i < 40; i++ {
-		bola := &bola{
-			centro: vet2{30 + float32(i*20), telaAltura / 2},
-			raio:   12,
-		}
-		jogo.adicionaObjeto(bola)
-	}
 	bola := &bola{
-		centro: vet2{telaLargura / 2, telaAltura / 2},
-		raio:   12,
+		centro: vet2{telaLargura / 2, telaAltura - 64},
+		raio:   8,
 	}
 	jogo.adicionaObjeto(bola)
 
