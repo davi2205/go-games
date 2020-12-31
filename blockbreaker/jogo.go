@@ -4,7 +4,9 @@
 
 package main
 
-import "github.com/hajimehoshi/ebiten"
+import (
+	"github.com/hajimehoshi/ebiten"
+)
 
 type colisao struct {
 	sujeito        objeto2d
